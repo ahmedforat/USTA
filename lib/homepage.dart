@@ -13,20 +13,29 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin,WidgetsBindingObserver {
   TabController tabController;
 
   @override
   void initState() {
     super.initState();
-
+    WidgetsBinding.instance.addObserver(this);
     tabController = TabController(length: 3, vsync: this);
   }
 
   @override
   void dispose() {
     tabController.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state){
+    if(state == AppLifecycleState.paused)
+        print("GoodBy from inside home page");
+    if(state == AppLifecycleState.resumed)
+      print("welcome back to home page");
   }
 
   List companyname = [

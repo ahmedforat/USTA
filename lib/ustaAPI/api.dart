@@ -2,11 +2,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter_login_page_ui/utils/GlobalVariables.dart';
 import 'package:http/http.dart' as http;
 
 
 
- ///     [900  ==  username already exist]
+ //     [208  ==  username already exist (already reported) ]
+ ///     [206 == Partial content (missing data)]
 ///      [901  ==  no such username]
 ///      [902  ==  no internet connection]
 ///      [111  ==  new bug inside flutter ]
@@ -26,8 +28,6 @@ class UstaAPI{
       return ConventionResponse.failedConnection();   /// status 902
     }
 
-
-
     const String SIGN_UP_URL = 'http://10.0.2.2:9000/signup';
     http.Response response;
 
@@ -38,29 +38,28 @@ class UstaAPI{
     } on TimeoutException{
       return ConventionResponse.serverNotResponding();  ///status 503
     }catch(err){
+      print("yahoo here is the problem");
       print(err.toString());
       return ConventionResponse.newBugToBeHandeled();   /// status 111
     }
 
 //    Map<String,dynamic> recievedData = json.decode(response.body);
-    ConventionResponse result;
+    ConventionResponse result = ConventionResponse.newBugToBeHandeled();
 //
 //    print(recievedData);
 //    print("recieved data");
 
     switch(response.statusCode){
-      case 201 :
+      case 201 :   // created
         result = new ConventionResponse.success201();  /// status 201 created !
         break;
-      case 500:
+      case 500:    // internal server error
         result = new ConventionResponse.internalServerError();  /// status 500
         break;
-      case 900:
+      case 208:    // already reported
         result = new ConventionResponse.usernameAlreadyExist();   /// status 900
         break;
-      case 422 :
-        result = new ConventionResponse.notValidEmail();
-        break;
+
       default :print("Hello World new thing has not been handled");
     }
     return result;
@@ -74,7 +73,7 @@ class UstaAPI{
   ///* [Hello World, This is Karrar the hero of coding and programming]
   ///* [***********************************************************************************************]
 
-  Future<ConventionResponse> logIn({Map<String,dynamic> user}) async{
+  Future<ConventionResponse> login({Map<String,dynamic> user}) async{
 
     if(!isConnected){
       return ConventionResponse.failedConnection();
@@ -95,6 +94,7 @@ class UstaAPI{
     }
 
     recievedData = json.decode(response.body);
+
     print("recieved json ***************");
     print(recievedData);
     print("recieved json ***************");
@@ -104,6 +104,10 @@ class UstaAPI{
     switch(response.statusCode){
 
       case 200 :
+        GlobalVariables.authorizationToken = recievedData["token"];
+        print("jwt token ***************");
+        print(GlobalVariables.authorizationToken);
+        print("jwt token ***************");
         result = new ConventionResponse.success200();
         break;
       case 404:
@@ -118,7 +122,7 @@ class UstaAPI{
         break;
 
       default :
-        print("Hello World");
+        result = new ConventionResponse.newBugToBeHandeled();
     }
 
     return result;
@@ -157,6 +161,44 @@ class UstaAPI{
       default:
         print("Hello World");
     }
+    return result;
+  }
+
+  Future<ConventionResponse> savePostSignupData({Map<String,dynamic> data}) async{
+    if(!isConnected){
+      return ConventionResponse.failedConnection();
+    }
+    
+    http.Response response;
+    String url = "http://10.0.2.2:9000/complete-credentials";
+    Duration timeoutDuration = new Duration(seconds: 7);
+    ConventionResponse result;
+    try{
+      response  = await http.post(Uri.encodeFull(url),body: json.encode(data),headers: {"content-type":"application/json"}).timeout(timeoutDuration);
+    }
+    on TimeoutException {
+      return ConventionResponse.serverNotResponding();
+     } catch(err){
+      print("Here is a problem");
+       return ConventionResponse.newBugToBeHandeled();
+    }
+
+      print(response.statusCode);
+
+   switch(response.statusCode){
+     case 200 : 
+          result = ConventionResponse.success200();
+          break;
+    case 500 :
+          result =  ConventionResponse.internalServerError();
+          break;
+     case 404:
+        result = ConventionResponse.noSuchUsername();
+        break;
+    default:
+        result = ConventionResponse.newBugToBeHandeled();
+        break;
+   }
     return result;
   }
 }
@@ -225,14 +267,15 @@ class ConventionResponse{
   );
 
   factory ConventionResponse.notValidEmail() => new ConventionResponse(
-    status: 422,
+    status: 422,       // unprocessable entity
     label:"failed"
   );
 
   factory ConventionResponse.usernameAlreadyExist(){
     return ConventionResponse(
         label: "failed",
-        payload: "Email you entered is already exist, try to login in"
+        payload: "Email you entered is already exist, try to login in",
+      status: 208
     );
   }
 
@@ -245,13 +288,15 @@ class ConventionResponse{
   factory ConventionResponse.noSuchUsername(){
     return ConventionResponse(
         label: "failed",
-        payload: "Username you entered is not registered , Try to sign up"
+        payload: "Username you entered is not registered , Try to sign up",
+      status: 404
     );
   }
 
   factory ConventionResponse.newBugToBeHandeled() => new ConventionResponse(
     status: 111,
     label: "failed",
-    payload: "new bug inside flutter has been occured"
+    payload: "new bug inside flutter has been occured",
+
   );
 }

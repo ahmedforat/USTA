@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_login_page_ui/ustaAPI/api.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'Widgets/intro.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import './utils/validators.dart' ;
 
 class SignUp extends StatefulWidget {
@@ -25,15 +25,17 @@ class _SignUpState extends State<SignUp> {
   TextEditingController emailController = new TextEditingController();
   TextEditingController passwordController = new TextEditingController();
   TextEditingController phoneNumberController  = new TextEditingController();
-
+  
+  
 
   
 
+/// [Shared Preferences for proper widgets display]
 
+SharedPreferences preferences;
 
-
-  var Gender=['Male','Female',];
-  var selectedGender='Male';
+  var Gender = ['Male','Female',];
+  var selectedGender = 'Male';
   var professionalState=['Employee','Unemployed',];
   var selectedProfessionalState='Employee';
 
@@ -243,7 +245,7 @@ class _SignUpState extends State<SignUp> {
                       child: Material(
                         color: Colors.transparent,
                         child: InkWell(
-                          onTap: ()async {
+                          onTap: () async {
 
                             if(formKey.currentState.validate()){
 
@@ -269,11 +271,16 @@ class _SignUpState extends State<SignUp> {
                                 if(res.status != 201)
                                     scaffoldKey.currentState.showSnackBar(getSnackBar(content: res.payload));
                                 else{
+                                  preferences = await SharedPreferences.getInstance();
+
+                                  await preferences.setString("init", "/complete-credentials-page");
+                                  await preferences.setString("email", newUser["email"]);
+
                                   Navigator.of(context).pushNamedAndRemoveUntil("/complete-credentials-page",
                                       ModalRoute.withName(null));
                                 }
                               }catch(err){
-                                scaffoldKey.currentState.showSnackBar(getSnackBar(content: "Error"));
+                                scaffoldKey.currentState.showSnackBar(getSnackBar(content: "Error inside Catch statement"));
                                 print(err.toString());
                               }
 

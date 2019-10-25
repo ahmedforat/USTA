@@ -12,7 +12,7 @@ class IntroFourPage extends StatefulWidget {
   _IntroFourPageState createState() => _IntroFourPageState();
 }
 
-class _IntroFourPageState extends State<IntroFourPage> {
+class _IntroFourPageState extends State<IntroFourPage> with WidgetsBindingObserver {
   final SwiperController  _swiperController = SwiperController();
   final int _pageCount = 3;
   int _currentIndex = 0;
@@ -21,6 +21,10 @@ class _IntroFourPageState extends State<IntroFourPage> {
     "AHMED FORAT \n AHMED FORATAHMED FORAT \n AHMED FORAT. ",
     "AHMED FORAT \nAHMED FORATAHMED FORAT\n AHMED FORATAHMED FORAT,"
   ];
+
+
+
+
 
   final String bgImage = "assets/photographer.jpg";
 

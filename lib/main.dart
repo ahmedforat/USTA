@@ -4,7 +4,10 @@ import 'package:flutter/cupertino.dart';
 import "package:flutter/material.dart";
 import 'package:flutter_login_page_ui/SignUp.dart';
 import 'package:flutter_login_page_ui/homepage.dart';
+import 'package:flutter_login_page_ui/post-login-survey/checkEmailWidget.dart';
+import 'package:flutter_login_page_ui/post-login-survey/survey.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'Widgets/FormCard.dart';
 import 'Widgets/SocialIcons.dart';
 import 'CustomIcons.dart';
@@ -15,23 +18,66 @@ import 'ustaAPI/api.dart';
 
 
 void main() => runApp(MaterialApp(
-      home: MyApp(),
+      home: LandingPage(),
       debugShowCheckedModeBanner: false,
       routes: <String,WidgetBuilder>{
         "/signup-page":(context) => SignUp(),
-        "/landing-page":(context) => MyApp(),
+        "/landing-page":(context) => LandingPage(),
         "/home-page":(context) => HomePage(),
-        "/complete-credentials-page":(context) => IntroFourPage(),
+        "/complete-credentials-page":(context) => SurveyPage(),
+        "/verify-your-email":(context) => CheckForValidationWidget()
       },
     ));
  
-class MyApp extends StatefulWidget {
+class LandingPage extends StatefulWidget {
   @override
-  _MyAppState createState() => _MyAppState();
+  _LandingPageState createState() => _LandingPageState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _LandingPageState extends State<LandingPage> with WidgetsBindingObserver {
 
+  Future<List<dynamic>> checkAuthentication()async{
+    List l = [];
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    bool v = preferences.containsKey("init");
+    l.add(v);
+    l.add(v?preferences.get("init") :null);
+    return l;
+  }
+  @override
+  void initState() {
+    super.initState();
+
+    checkAuthentication().then((List value){
+        if(value.first){
+          Navigator.of(context).pushNamedAndRemoveUntil(value[1], ModalRoute.withName(null));
+        }
+    });
+
+    WidgetsBinding.instance.addObserver(this);
+    usernameController = new TextEditingController();
+    passwordController = new TextEditingController();
+    formKey = new GlobalKey<FormState>();
+    scaffoldKey = new GlobalKey<ScaffoldState>();
+    user = <String,dynamic>{};
+  }
+  
+  @override
+  void dispose(){
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if(state == AppLifecycleState.paused){
+      print("Good by from landing");
+    }
+    if(state == AppLifecycleState.resumed){
+      print("Welcome back to landing");
+    }
+  }
 
   TextEditingController usernameController ;
   TextEditingController passwordController ;
@@ -52,15 +98,7 @@ class _MyAppState extends State<MyApp> {
   );
 
 
-  @override
-  void initState() {
-    super.initState();
-    usernameController = new TextEditingController();
-    passwordController = new TextEditingController();
-    formKey = new GlobalKey<FormState>();
-    scaffoldKey = new GlobalKey<ScaffoldState>();
-    user = <String,dynamic>{};
-  }
+ 
 
 
   @override
@@ -82,9 +120,7 @@ class _MyAppState extends State<MyApp> {
         body: Stack(
           fit: StackFit.expand,
           children: <Widget>[
-
             Column(
-
               crossAxisAlignment: CrossAxisAlignment.end,
               children: <Widget>[
 
@@ -170,6 +206,7 @@ class _MyAppState extends State<MyApp> {
 
                                 if(!isValid){
                                   // do nothing until the user enter valid credentials
+                                  // by the way form validation messages will be show up
                                 }
                                 else{
                                   user["username"] = usernameController.text;
@@ -177,14 +214,14 @@ class _MyAppState extends State<MyApp> {
                                   user["rememberMe"] = GlobalVariables.remeberMe;
                                   ConventionResponse res;
                                   try{
-                                    res = await new UstaAPI(isConnected: true).logIn(user: user);
+                                    res = await new UstaAPI(isConnected: true).login(user: user);
                                     if(res.status != 200)
                                         scaffoldKey.currentState.showSnackBar(getSnackBar(content: res.payload));
                                     else
-                                        Navigator.of(context).pushReplacementNamed("/home-page");
+                                        Navigator.of(context).pushNamedAndRemoveUntil("/home-page",ModalRoute.withName(null));
                                   }catch(err){
                                     print(err.toString());
-                                    scaffoldKey.currentState.showSnackBar(getSnackBar(content: "Error inside Catch statemetn"));
+                                    scaffoldKey.currentState.showSnackBar(getSnackBar(content: "Error inside Catch statement"));
                                   }
                                 }
 
@@ -223,8 +260,6 @@ class _MyAppState extends State<MyApp> {
                                 fontSize: 20.0,
                                 fontFamily: "Poppins-Medium"
                                 ,letterSpacing: 2.0)),
-
-
                       ],
                     ),
                     Row(
@@ -291,6 +326,11 @@ class _MyAppState extends State<MyApp> {
   }
 
   Widget getSnackBar({String content}) => SnackBar(
-    content: Text(content),
+    content: Text(content,style: TextStyle(color: Colors.red),),
+    backgroundColor: Colors.white,
+     shape: RoundedRectangleBorder(
+       borderRadius: BorderRadius.circular(10)
+     ),
+
   );
 }

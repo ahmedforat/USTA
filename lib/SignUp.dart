@@ -272,7 +272,6 @@ SharedPreferences preferences;
                                     scaffoldKey.currentState.showSnackBar(getSnackBar(content: res.payload));
                                 else{
                                   preferences = await SharedPreferences.getInstance();
-
                                   await preferences.setString("init", "/complete-credentials-page");
                                   await preferences.setString("email", newUser["email"]);
 

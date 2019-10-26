@@ -131,8 +131,11 @@ class _SurveyPageState extends State<SurveyPage>
                            res = await UstaAPI(isConnected: true).savePostSignupData(data: postSignupData);
                            if(res.status != 200)
                              scaffoldKey.currentState.showSnackBar(getSnackBar(content: res.payload));
-                           else
+                           else{
+
                              Navigator.of(context).pushNamedAndRemoveUntil("/verify-your-email", ModalRoute.withName(null));
+                           }
+
                          }catch(err){
                            print(err);
                            scaffoldKey.currentState.showSnackBar(getSnackBar(content: "error inside catch line 133"));

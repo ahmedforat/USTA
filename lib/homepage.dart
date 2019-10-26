@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_login_page_ui/Widgets/Schedule.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'Widgets/Courses attended.dart';
 import 'Widgets/Notification.dart';
@@ -167,6 +168,7 @@ class _HomePageState extends State<HomePage>
               ),
               InkWell(
                 onTap: () {
+                  
                   Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -197,6 +199,19 @@ class _HomePageState extends State<HomePage>
                   title: Text('About'),
                   leading: Icon(Icons.help),
                 ),
+              ),
+
+              IconButton(
+                icon: ListTile(
+                  leading: Icon(Icons.time_to_leave),
+                  title: Text("Log out"),
+                ),
+
+                onPressed: ()async{
+                  SharedPreferences pref = await SharedPreferences.getInstance();
+                  await pref.remove("token");
+                  Navigator.of(context).pushNamedAndRemoveUntil('/landing-page', ModalRoute.withName(null));
+                },
               )
             ],
           ),

@@ -8,7 +8,12 @@ import 'package:flutter_login_page_ui/homepage.dart';
 import 'package:flutter_login_page_ui/post-login-survey/checkEmailWidget.dart';
 import 'package:flutter_login_page_ui/post-login-survey/survey.dart';
 import 'package:flutter_login_page_ui/utils/AuthData.dart';
+import 'package:flutter_login_page_ui/utils/SharedPreferences.dart';
+import 'package:flutter_login_page_ui/utils/add_new_course.dart';
+import 'package:flutter_login_page_ui/utils/firebase.dart';
+import 'package:flutter_login_page_ui/utils/global_widget.dart';
 import 'package:flutter_login_page_ui/utils/trailer.dart';
+import 'package:flutter_login_page_ui/utils/tutorProfile.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'Widgets/FormCard.dart';
@@ -19,15 +24,15 @@ import './utils/GlobalVariables.dart';
 import 'ustaAPI/api.dart';
 
 void main() => runApp(MaterialApp(
-      home: TrailerPage(),
-      debugShowCheckedModeBanner: false,
+home:Signup(),
+//      debugShowCheckedModeBanner: false,
       routes: <String, WidgetBuilder>{
-        "/signup-page": (context) => SignUp(),
+
+        "/signup-page": (context) => Signup(),
         "/landing-page": (context) => LandingPage(),
-        "/home-page": (context) => HomePage(),
         "/complete-credentials-page": (context) => SurveyPage(),
         "/verify-your-email": (context) => CheckForValidationWidget(),
-        "/trailer-page" : (context) => TrailerPage()
+        '/home-page': (context) => HomePage(),
       },
     ));
 
@@ -36,40 +41,26 @@ class LandingPage extends StatefulWidget {
   _LandingPageState createState() => _LandingPageState();
 }
 
-class _LandingPageState extends State<LandingPage> with WidgetsBindingObserver {
+class _LandingPageState extends State<LandingPage> {
 
-  static Future<AuthData> checkAuthentication() async {
-    AuthData authData = new AuthData();
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    if(preferences.containsKey("init")){
-
-      authData.init = preferences.get("init");
-      return authData;
-    }
-    if(preferences.containsKey("token")){
-      authData.token =  preferences.get("token");
-      return authData;
-    }
-    return null;
-  }
 
   @override
   void initState() {
     super.initState();
 
-    checkAuthentication().then((AuthData data){
-      if(data != null){
-        setState(() {
-
-        });
-        if(data.init != null)
-          Navigator.of(context).pushNamedAndRemoveUntil(data.init, ModalRoute.withName(null));
-        else
-          Navigator.of(context).pushNamedAndRemoveUntil("/home-page", ModalRoute.withName(null));
+    AuthorizationManager.getPreferences().then((AuthData data){
+      if(!data.isNull){
+        if(data.init != null){
+          print("naving to init");
+          Navigator.of(context).pushReplacementNamed(data.init);
+        }else{
+          print("naving to homepage");
+          Navigator.of(context).pushReplacementNamed("/home-page");
+        }
       }
     });
 
-    WidgetsBinding.instance.addObserver(this);
+    //WidgetsBinding.instance.addObserver(this);
     usernameController = new TextEditingController();
     passwordController = new TextEditingController();
     formKey = new GlobalKey<FormState>();
@@ -79,19 +70,19 @@ class _LandingPageState extends State<LandingPage> with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+   // WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused) {
-      print("Good by from landing");
-    }
-    if (state == AppLifecycleState.resumed) {
-      print("Welcome back to landing");
-    }
-  }
+//  @override
+//  void didChangeAppLifecycleState(AppLifecycleState state) {
+//    if (state == AppLifecycleState.paused) {
+//      print("Good by from landing");
+//    }
+//    if (state == AppLifecycleState.resumed) {
+//      print("Welcome back to landing");
+//    }
+//  }
 
   TextEditingController usernameController;
   TextEditingController passwordController;
@@ -197,6 +188,7 @@ class _LandingPageState extends State<LandingPage> with WidgetsBindingObserver {
                                   if (!isValid) {
                                     // do nothing until the user enter valid credentials
                                     // by the way form validation messages will be show up
+                                    // and tell him/her to correct the inputs
                                   } else {
                                     user["username"] = usernameController.text;
                                     user["password"] = passwordController.text;
@@ -204,7 +196,7 @@ class _LandingPageState extends State<LandingPage> with WidgetsBindingObserver {
                                         GlobalVariables.remeberMe;
                                     ConventionResponse res;
                                     try {
-                                      res = await  UstaAPI(isConnected: true)
+                                      res = await  API(isConnected: true)
                                           .login(user: user);
                                       if (res.status != 200)
                                         scaffoldKey.currentState.showSnackBar(
@@ -213,7 +205,7 @@ class _LandingPageState extends State<LandingPage> with WidgetsBindingObserver {
                                         Navigator.of(context)
                                             .pushNamedAndRemoveUntil(
                                             "/home-page",
-                                            ModalRoute.withName(null));
+                                            (Route route) => false);
                                       }
 
                                     } catch (err) {

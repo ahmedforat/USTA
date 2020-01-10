@@ -22,9 +22,15 @@ class AuthorizationManager{
     _preferences = await SharedPreferences.getInstance();
     if(_preferences.containsKey("token"))
         authData.token = _preferences.get("token");
+
     if(_preferences.containsKey("init"))
         authData.init = _preferences.get("init");
 
+    if(authData.init == null && authData.token == null){
+      authData.isNull = true;
+    }else{
+      authData.isNull = false;
+    }
     return authData;
   }
 

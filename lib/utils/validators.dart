@@ -36,7 +36,7 @@ class Validators{
       return "Please email is required";
     }
     RegExp regExp = new RegExp(r"^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$",caseSensitive: true);
-    bool isEmail = regExp.hasMatch(email);
+    bool isEmail = regExp.hasMatch(email.trim());
     if(!isEmail){
       return "please enter a valid email like example@something.com";
     }

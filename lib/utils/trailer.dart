@@ -1,6 +1,6 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
+import '../homepage.dart';
 import '../utils/SharedPreferences.dart';
 import 'AuthData.dart';
 
@@ -14,18 +14,20 @@ class _TrailerPageState extends State<TrailerPage> {
 
   @override
   void initState() {
-    Timer(Duration(milliseconds: 1400),(){
-
+    print("****************************************************************************** Trailer page");
+    Future.delayed(Duration(milliseconds: 1300),(){
       AuthorizationManager.getPreferences().then((AuthData data){
-        if(data.token != null){
-          Navigator.of(context).pushNamedAndRemoveUntil("/home-page", ModalRoute.withName(null));
-        }
-        else if(data.init != null){
-          Navigator.of(context).pushNamedAndRemoveUntil(data.init, ModalRoute.withName(null));
-        }
-        else{
-          Navigator.of(context).pushNamedAndRemoveUntil("/landing-page", ModalRoute.withName(null));
-        }
+        print("Trailer page");
+        print(data.toString());
+        if(!data.isNull){
+          if(data.init != null)
+            Navigator.of(context).pushReplacementNamed(data.init);
+
+          else
+            Navigator.of(context).pushReplacementNamed('/home-page',arguments: "Hello Args");
+
+        }else
+          Navigator.of(context).pushReplacementNamed("/landing-page");
 
       });
     });

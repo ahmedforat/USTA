@@ -1,0 +1,69 @@
+{
+  "project_info": {
+    "project_number": "224443960826",
+    "firebase_url": "https://lobby-17165.firebaseio.com",
+    "project_id": "lobby-17165",
+    "storage_bucket": "lobby-17165.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:224443960826:android:7b7ace75539ad6de77e843",
+        "android_client_info": {
+          "package_name": "com.example.ambulance_orienter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "224443960826-gv9jqkhqp5l51072fvuh2rert1bcnf85.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCD1-4uuKL5KY6FfCDTSL9m2oZRh11cweQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "224443960826-gv9jqkhqp5l51072fvuh2rert1bcnf85.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:224443960826:android:e363178bedc5437877e843",
+        "android_client_info": {
+          "package_name": "com.example.usta"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "224443960826-gv9jqkhqp5l51072fvuh2rert1bcnf85.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCD1-4uuKL5KY6FfCDTSL9m2oZRh11cweQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "224443960826-gv9jqkhqp5l51072fvuh2rert1bcnf85.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

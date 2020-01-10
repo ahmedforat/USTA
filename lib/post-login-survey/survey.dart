@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_login_page_ui/ustaAPI/api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -24,7 +25,7 @@ class _SurveyPageState extends State<SurveyPage>
   String college;
   answers academicStudent = answers.No;
 
-  Map<String,dynamic> postSignupData = <String,dynamic>{};
+  Map<String,dynamic> postSignUpData = <String,dynamic>{};
   List<String> _universities = [
     'جامعة بغداد',
     'الجامعة المستنصرية',
@@ -72,11 +73,15 @@ class _SurveyPageState extends State<SurveyPage>
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown
+    ]);
     return SafeArea(
       child: Scaffold(
         key: scaffoldKey,
         body: Container(
-          padding: EdgeInsets.all(8.0),
+         // padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.0000001),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -92,17 +97,18 @@ class _SurveyPageState extends State<SurveyPage>
                       0),
                   child: _handleSurveyWidgetsDisplay()),  ///[ this function handles the switching of questions]
               Container(
-                width: 100.0,
-                margin: EdgeInsets.only(top: 100.0),
+                width: MediaQuery.of(context).size.width * 0.3,
+                margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.05),
                 child: RaisedButton(
                   color: Colors.blueAccent,
+
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       Text(
                         isDone?"حفظ":"التالي",
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(color: Colors.white,fontSize: MediaQuery.of(context).size.width*0.3*0.13),
                       ),
                       isDone? SizedBox():Icon(
                         Icons.chevron_right,
@@ -110,7 +116,8 @@ class _SurveyPageState extends State<SurveyPage>
                       )
                     ],
                   ),
-                  onPressed: ()async {
+                  onPressed: !isSelectionVisible()
+                  ?()async {
                     try {
                       controller.reverse().then((d) async {
                         if (!isDone) {
@@ -119,34 +126,33 @@ class _SurveyPageState extends State<SurveyPage>
                             controller.forward();
                           });
                         } else {
-                          postSignupData["isGraduated"] = isGraduated == answers.Yes;
-                          postSignupData["college"] = college.toString();
-                          postSignupData["university"] = university.toString();
-                          postSignupData["academicStudnet"] = academicStudent == answers.Yes;
+                          postSignUpData["isGraduated"] = isGraduated == answers.Yes;
+                          postSignUpData["college"] = college.toString();
+                          postSignUpData["university"] = university.toString();
+                          postSignUpData["academicStudnet"] = academicStudent == answers.Yes;
 
-                         SharedPreferences prefs = await SharedPreferences.getInstance();
-                         postSignupData["email"] = await prefs.get("email");
-                         ConventionResponse res;
-                         try{
-                           res = await UstaAPI(isConnected: true).savePostSignupData(data: postSignupData);
-                           if(res.status != 200)
-                             scaffoldKey.currentState.showSnackBar(getSnackBar(content: res.payload));
-                           else{
+                          ConventionResponse res;
 
-                             Navigator.of(context).pushNamedAndRemoveUntil("/verify-your-email", ModalRoute.withName(null));
-                           }
+                          res = await API(isConnected: true).savePostSignUpData(data: postSignUpData);
+                          if(res.status != 200)
+                          {
+                            scaffoldKey.currentState.showSnackBar(getSnackBar(content: res.payload));
+                          }
+                          else{
+                            Navigator.of(context).pushNamedAndRemoveUntil("/home-page", ModalRoute.withName(null));
+                          }
 
-                         }catch(err){
-                           print(err);
-                           scaffoldKey.currentState.showSnackBar(getSnackBar(content: "error inside catch line 133"));
-                         }
-                          print(postSignupData);
+                          scaffoldKey.currentState.showSnackBar(getSnackBar(content: "error inside catch line 133"));
+
+
+                          print(postSignUpData);
                         }
                       });
                     } catch (err) {
                       print(err.toString());
                     }
-                  },
+                  }
+                  :null,
                 ),
               ),
              
@@ -164,12 +170,13 @@ class _SurveyPageState extends State<SurveyPage>
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Container(
-          margin: EdgeInsets.only(top: 210.0),
+          margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.27),
           child: Text(
             "Are you graduated  هل انت خريج جامعي",
-            style: TextStyle(fontSize: 20.0),
+            style: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.045),
           ),
         ),
+        SizedBox(height: MediaQuery.of(context).size.height * 0.01,),
         RadioListTile(
           title: Text("Yes"),
           groupValue: graduationState,
@@ -209,11 +216,11 @@ class _SurveyPageState extends State<SurveyPage>
       children: <Widget>[
         Container(
           width: MediaQuery.of(context).size.width,
-          margin: EdgeInsets.only(top: 210.0),
+          margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.19),
           child: Text(
             "choose your university and college \n حدد الكلية والجامعة التي درست بها ",
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 20.0),
+            style: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.05),
           ),
         ),
         getDropDownButtonUniversity(),
@@ -232,11 +239,11 @@ class _SurveyPageState extends State<SurveyPage>
           child: Text(
             "Are you academic student\n هل انت طالب جامعي",
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 20.0),
+            style: TextStyle(fontSize: MediaQuery.of(context).size.width*0.05),
           ),
         ),
         RadioListTile(
-          title: Text("Yes"),
+          title: Text("Yes",style: TextStyle(fontSize: MediaQuery.of(context).size.width*0.045),),
           groupValue: isAcademicStudent,
           value: answers.Yes,
           selected: false,
@@ -249,7 +256,7 @@ class _SurveyPageState extends State<SurveyPage>
         ),
         RadioListTile(
           selected: false,
-          title: Text("No"),
+          title: Text("No",style: TextStyle(fontSize: MediaQuery.of(context).size.width*0.045)),
           groupValue: isAcademicStudent,
           value: answers.No,
           onChanged: (res) {
@@ -303,7 +310,7 @@ class _SurveyPageState extends State<SurveyPage>
           });
         },
         value: _collegeselected,
-        hint: Text("اختر الجامعة"));
+        hint: Text("اختر الكلية"));
   }
 
   Widget _handleSurveyWidgetsDisplay() {
@@ -386,5 +393,12 @@ class _SurveyPageState extends State<SurveyPage>
     return SnackBar(
       content: Text(content),
     );
+  }
+
+  bool isSelectionVisible(){
+    return (academicStudent == answers.Yes && indicator == 2) || (indicator == 1 && isGraduated == answers.Yes);
+  }
+  bool handleDisability(){
+        return isSelectionVisible() && (_universitySelected != null && _collegeselected != null);
   }
 }
